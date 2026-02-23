@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>日和捕影 - 意見調查練習</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Noto Sans TC', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#FDFBF7] text-[#4A443F]"> <div class="max-w-md mx-auto mt-20 p-8 bg-white shadow-lg rounded-2xl border border-[#E5DED3]">
+        <h1 class="text-2xl font-bold text-[#5C6347] mb-4">日和捕影問卷練習</h1>
+        <p class="text-sm text-gray-500 mb-8">這是一個與 Google 表單串接的練習網頁</p>
+
+        <div id="survey-ui">
+            <h2 id="q-text" class="text-lg font-medium mb-6">問題加載中...</h2>
+            <div id="options" class="space-y-3">
+                </div>
+        </div>
+
+        <div id="thanks" class="hidden text-center">
+            <h2 class="text-xl font-bold text-[#5C6347]">提交成功！</h2>
+            <p class="mt-2 text-gray-600">感謝你的填寫，資料已傳送到 Google 表單。</p>
+        </div>
+    </div>
+
+    <script>
+        // 【練習重點 1】設定你的 Google 表單 ID
+        const FORM_ID = "這裡填入你的表單ID";
+
+        // 【練習重點 2】設定你的問題與 Entry ID
+        const questions = [
+            { 
+                title: "你最喜歡哪種主題？", 
+                options: ["露營生活", "室內植物", "動物攝影"], 
+                eid: "entry.1111111" // 這裡填入你抓到的 Entry ID
+            },
+            { 
+                title: "你目前有在種植物嗎？", 
+                options: ["我是綠手指", "我是植物殺手", "準備開始"], 
+                eid: "entry.2222222" 
+            }
+        ];
+
+        let index = 0;
+        let results = {};
+
+        function render() {
+            const q = questions[index];
+            document.getElementById('q-text').innerText = q.title;
+            const optDiv = document.getElementById('options');
+            optDiv.innerHTML = '';
+
+            q.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-4 border rounded-xl hover:bg-[#F3F4ED] hover:border-[#5C6347] transition";
+                btn.innerText = opt;
+                btn.onclick = () => {
+                    results[q.eid] = opt; // 記錄選擇
+                    if(index < questions.length - 1) {
+                        index++;
+                        render();
+                    } else {
+                        submit(); // 最後一題完就提交
+                    }
+                };
+                optDiv.appendChild(btn);
+            });
+        }
+
+        // 【練習重點 3】傳送資料到 Google 的函式
+        function submit() {
+            const formData = new FormData();
+            for (let key in results) { formData.append(key, results[key]); }
+
+            fetch(`https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`, {
+                method: 'POST',
+                body: formData,
+                mode: 'no-cors'
+            }).then(() => {
+                document.getElementById('survey-ui').classList.add('hidden');
+                document.getElementById('thanks').classList.remove('hidden');
+            });
+        }
+
+        render(); // 啟動問卷
+    </script>
+</body>
+</html>
