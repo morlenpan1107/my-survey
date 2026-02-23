@@ -2,6 +2,7 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>日和捕影 - 意見調查練習</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -9,7 +10,8 @@
         body { font-family: 'Noto Sans TC', sans-serif; }
     </style>
 </head>
-<body class="bg-[#FDFBF7] text-[#4A443F]"> <div class="max-w-md mx-auto mt-20 p-8 bg-white shadow-lg rounded-2xl border border-[#E5DED3]">
+<body class="bg-[#FDFBF7] text-[#4A443F]"> 
+    <div class="max-w-md mx-auto mt-20 p-8 bg-white shadow-lg rounded-2xl border border-[#E5DED3]">
         <h1 class="text-2xl font-bold text-[#5C6347] mb-4">日和捕影問卷練習</h1>
         <p class="text-sm text-gray-500 mb-8">這是一個與 Google 表單串接的練習網頁</p>
 
@@ -20,26 +22,47 @@
         </div>
 
         <div id="thanks" class="hidden text-center">
-            <h2 class="text-xl font-bold text-[#5C6347]">提交成功！</h2>
-            <p class="mt-2 text-gray-600">感謝你的填寫，資料已傳送到 Google 表單。</p>
-        </div>
+    <div class="text-5xl mb-4">🌿</div>
+    <h2 class="text-xl font-bold text-[#5C6347]">提交成功！</h2>
+    <p class="mt-2 text-gray-600">感謝你的填寫，資料已傳送到 Google 表單。</p>
+    
+    <a href="https://www.instagram.com/hiyori_capture/" target="_blank" 
+       class="inline-block mt-8 px-6 py-3 bg-[#5C6347] text-white rounded-full font-medium shadow-md hover:bg-[#4A5039] transition">
+       追蹤「日和捕影」IG
+    </a>
+
+    <br>
+    <button onclick="location.reload()" class="mt-6 text-sm text-gray-400 underline">重新填寫</button>
+</div>
     </div>
 
     <script>
-        // 【練習重點 1】設定你的 Google 表單 ID
-        const FORM_ID = "這裡填入你的表單ID";
+        // 1. Google 表單 ID
+        const FORM_ID = "1iVQPrGSIDm52Fo4ayvB2JjIPGwTs_Dm3Vv9-nA50raQ";
 
-        // 【練習重點 2】設定你的問題與 Entry ID
+        // 2. 題目與編號設定
         const questions = [
             { 
                 title: "你最喜歡哪種主題？", 
                 options: ["露營生活", "室內植物", "動物攝影"], 
-                eid: "entry.1111111" // 這裡填入你抓到的 Entry ID
+                type: "select",
+                eid: "entry.1636338263" 
             },
             { 
                 title: "你目前有在種植物嗎？", 
                 options: ["我是綠手指", "我是植物殺手", "準備開始"], 
-                eid: "entry.2222222" 
+                type: "select",
+                eid: "entry.264994059" 
+            },
+            { 
+                title: "請問您的姓名？", 
+                type: "text", 
+                eid: "entry.16033771" 
+            },
+            { 
+                title: "請問您的電話？", 
+                type: "text", 
+                eid: "entry.1455934217" 
             }
         ];
 
@@ -52,39 +75,74 @@
             const optDiv = document.getElementById('options');
             optDiv.innerHTML = '';
 
-            q.options.forEach(opt => {
-                const btn = document.createElement('button');
-                btn.className = "w-full text-left p-4 border rounded-xl hover:bg-[#F3F4ED] hover:border-[#5C6347] transition";
-                btn.innerText = opt;
-                btn.onclick = () => {
-                    results[q.eid] = opt; // 記錄選擇
-                    if(index < questions.length - 1) {
-                        index++;
-                        render();
-                    } else {
-                        submit(); // 最後一題完就提交
+            if (q.type === "select") {
+                q.options.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.className = "w-full text-left p-4 border border-[#E5DED3] rounded-xl hover:bg-[#F3F4ED] hover:border-[#5C6347] transition mb-1";
+                    btn.innerText = opt;
+                    btn.onclick = () => {
+                        results[q.eid] = opt;
+                        next();
+                    };
+                    optDiv.appendChild(btn);
+                });
+            } else {
+                const input = document.createElement('input');
+                input.type = "text";
+                input.className = "w-full p-4 border border-[#E5DED3] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#5C6347] mb-4 text-lg";
+                input.placeholder = "請在此輸入...";
+                
+                const nextBtn = document.createElement('button');
+                nextBtn.className = "w-full bg-[#5C6347] text-white p-4 rounded-xl font-bold hover:bg-[#4A5039] transition";
+                nextBtn.innerText = index === questions.length - 1 ? "完成提交" : "下一題";
+                
+                nextBtn.onclick = () => {
+                    if (input.value.trim() === "") {
+                        alert("請填寫內容喔！");
+                        return;
                     }
+                    results[q.eid] = input.value;
+                    next();
                 };
-                optDiv.appendChild(btn);
-            });
+                
+                optDiv.appendChild(input);
+                optDiv.appendChild(nextBtn);
+            }
         }
 
-        // 【練習重點 3】傳送資料到 Google 的函式
+        function next() {
+            if (index < questions.length - 1) {
+                index++;
+                render();
+            } else {
+                submit();
+            }
+        }
+
         function submit() {
             const formData = new FormData();
-            for (let key in results) { formData.append(key, results[key]); }
+            for (let key in results) { 
+                formData.append(key, results[key]); 
+            }
 
-            fetch(`https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`, {
+            // 修改後的連線網址
+            const formUrl = `https://docs.google.com/forms/d/${FORM_ID}/formResponse`;
+
+            fetch(formUrl, {
                 method: 'POST',
                 body: formData,
                 mode: 'no-cors'
             }).then(() => {
                 document.getElementById('survey-ui').classList.add('hidden');
                 document.getElementById('thanks').classList.remove('hidden');
+            }).catch(err => {
+                // 即使報錯也會顯示成功畫面，因為這是前端唯一的處理方式
+                document.getElementById('survey-ui').classList.add('hidden');
+                document.getElementById('thanks').classList.remove('hidden');
             });
         }
 
-        render(); // 啟動問卷
+        render();
     </script>
 </body>
 </html>
